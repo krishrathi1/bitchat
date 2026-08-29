@@ -67,7 +67,7 @@ final class SecureNoiseSession: NoiseSession {
             return true
         }
 
-        // Check if last activity was more than 30 minutes ago
+        // Check if last activity exceeded sessionTimeout
         if Date().timeIntervalSince(lastActivityTime) > NoiseSecurityConstants.sessionTimeout {
             return true
         }
