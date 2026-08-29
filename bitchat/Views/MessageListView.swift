@@ -158,14 +158,16 @@ struct MessageListView: View {
                                         conversationUIModel.resendFailedPrivateMessage(message)
                                     }
                                 }
-                                Button(
-                                    String(
-                                        localized: "content.actions.forward",
-                                        defaultValue: "Forward",
-                                        comment: "Context menu action that opens a picker to forward this message to another conversation"
-                                    )
-                                ) {
-                                    messageToForward = message
+                                if conversationUIModel.mediaAttachment(for: message) == nil {
+                                    Button(
+                                        String(
+                                            localized: "content.actions.forward",
+                                            defaultValue: "Forward",
+                                            comment: "Context menu action that opens a picker to forward this message to another conversation"
+                                        )
+                                    ) {
+                                        messageToForward = message
+                                    }
                                 }
                                 if showsUserActions {
                                     Button("content.actions.block", role: .destructive) {
