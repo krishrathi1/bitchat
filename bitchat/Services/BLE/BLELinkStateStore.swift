@@ -19,17 +19,18 @@ struct BLEPeripheralLinkState {
 }
 
 struct BLEConnectTimeoutPolicy {
-    /// Pure decision: given a captured attempt token and current link state,
+    /// Pure decision: given a captured attempt token and current link state attributes,
     /// returns true if the timeout closure should act on this peripheral attempt.
     static func shouldExecuteConnectTimeout(
         capturedAttemptToken: UInt64,
-        state: BLEPeripheralLinkState?,
+        isConnecting: Bool,
+        isConnected: Bool,
+        currentAttemptToken: UInt64,
         isPeripheralConnected: Bool
     ) -> Bool {
-        guard let state = state else { return false }
-        guard state.isConnecting && !state.isConnected else { return false }
+        guard isConnecting && !isConnected else { return false }
         guard !isPeripheralConnected else { return false }
-        guard state.attemptToken == capturedAttemptToken else { return false }
+        guard currentAttemptToken == capturedAttemptToken else { return false }
         return true
     }
 }

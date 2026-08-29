@@ -253,11 +253,14 @@ final class BLERadioController {
             // this check, this now-stale timeout would cancel that newer,
             // still-live attempt out from under it and apply a
             // connection-timeout penalty to a peer that never actually timed out.
-            guard BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
-                capturedAttemptToken: attemptToken,
-                state: state,
-                isPeripheralConnected: peripheral.state == .connected
-            ) else {
+            guard let state,
+                  BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
+                      capturedAttemptToken: attemptToken,
+                      isConnecting: state.isConnecting,
+                      isConnected: state.isConnected,
+                      currentAttemptToken: state.attemptToken,
+                      isPeripheralConnected: peripheral.state == .connected
+                  ) else {
                 if let state, state.attemptToken != attemptToken {
                     SecureLogger.debug("⏱️ Timeout fired for a superseded connection attempt, ignoring: \(candidate.name)", category: .session)
                 }

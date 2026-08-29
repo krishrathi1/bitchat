@@ -1,39 +1,18 @@
 import Foundation
-import CoreBluetooth
 import Testing
 @testable import bitchat
 
 struct BLEConnectTimeoutPolicyTests {
     @Test
-    func validConnectingAttemptTriggersTimeout() {
-        let token: UInt64 = 42
-        
-        // When state is nil -> false
-        #expect(!BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
-            capturedAttemptToken: token,
-            state: nil,
-            isPeripheralConnected: false
-        ))
-    }
-
-    @Test
     func supersededAttemptTokenIgnoresTimeout() {
         let capturedToken: UInt64 = 1
         let currentToken: UInt64 = 2
 
-        let mockState = BLEPeripheralLinkState(
-            peripheral: CBPeripheralMock.create(),
-            characteristic: nil,
-            isConnecting: true,
-            isConnected: false,
-            lastConnectionAttempt: Date(),
-            attemptToken: currentToken,
-            assembler: NotificationStreamAssembler()
-        )
-
         let result = BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
             capturedAttemptToken: capturedToken,
-            state: mockState,
+            isConnecting: true,
+            isConnected: false,
+            currentAttemptToken: currentToken,
             isPeripheralConnected: false
         )
 
@@ -44,19 +23,11 @@ struct BLEConnectTimeoutPolicyTests {
     func matchingAttemptTokenExecutesTimeout() {
         let token: UInt64 = 5
 
-        let mockState = BLEPeripheralLinkState(
-            peripheral: CBPeripheralMock.create(),
-            characteristic: nil,
-            isConnecting: true,
-            isConnected: false,
-            lastConnectionAttempt: Date(),
-            attemptToken: token,
-            assembler: NotificationStreamAssembler()
-        )
-
         let result = BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
             capturedAttemptToken: token,
-            state: mockState,
+            isConnecting: true,
+            isConnected: false,
+            currentAttemptToken: token,
             isPeripheralConnected: false
         )
 
@@ -67,31 +38,29 @@ struct BLEConnectTimeoutPolicyTests {
     func connectedStateIgnoresTimeout() {
         let token: UInt64 = 5
 
-        let mockState = BLEPeripheralLinkState(
-            peripheral: CBPeripheralMock.create(),
-            characteristic: nil,
-            isConnecting: false,
-            isConnected: true,
-            lastConnectionAttempt: Date(),
-            attemptToken: token,
-            assembler: NotificationStreamAssembler()
-        )
-
         let result = BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
             capturedAttemptToken: token,
-            state: mockState,
+            isConnecting: false,
+            isConnected: true,
+            currentAttemptToken: token,
             isPeripheralConnected: true
         )
 
         #expect(!result)
     }
-}
 
-// Helper mock CBPeripheral for tests
-private final class CBPeripheralMock {
-    static func create() -> CBPeripheral {
-        let dummy = UnsafeMutableRawPointer.allocate(byteCount: 256, alignment: 16)
-        dummy.initializeMemory(as: UInt8.self, repeating: 0, count: 256)
-        return Unmanaged<CBPeripheral>.fromOpaque(dummy).takeUnretainedValue()
+    @Test
+    func peripheralConnectedStateIgnoresTimeout() {
+        let token: UInt64 = 5
+
+        let result = BLEConnectTimeoutPolicy.shouldExecuteConnectTimeout(
+            capturedAttemptToken: token,
+            isConnecting: true,
+            isConnected: false,
+            currentAttemptToken: token,
+            isPeripheralConnected: true
+        )
+
+        #expect(!result)
     }
 }
