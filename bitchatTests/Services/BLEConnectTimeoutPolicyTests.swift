@@ -91,7 +91,7 @@ struct BLEConnectTimeoutPolicyTests {
 private final class CBPeripheralMock {
     static func create() -> CBPeripheral {
         let dummy = UnsafeMutableRawPointer.allocate(byteCount: 256, alignment: 16)
-        dummy.initializeMemory(as: UInt8.self, repeating: 0)
+        dummy.initializeMemory(as: UInt8.self, repeating: 0, count: 256)
         return Unmanaged<CBPeripheral>.fromOpaque(dummy).takeUnretainedValue()
     }
 }
